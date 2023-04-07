@@ -1,0 +1,91 @@
+module Recaptcha {
+    function initializeBackend() {
+        if Srl.System.exec("mkdir -p /tmp/gcaptcha") != 0 {
+            Srl.System.fail(1, "Recaptcha: Could not create temp directory.\n");
+        }
+        def js: String =
+            "let recaptchaOnloadResolve;"
+            "const recaptchaOnloadPromise = new Promise((resolve) => { recaptchaOnloadResolve = resolve });"
+            "function recaptchaOnloadCallback() {"
+            "  recaptchaOnloadResolve();"
+            "}"
+            "function awaitRecaptchaOnloadCallback() {"
+            "  return recaptchaOnloadPromise;"
+            "}"
+            "function renderRecaptcha(arg) {"
+            "  const { id, sitekey } = JSON.parse(arg);"
+            "  return grecaptcha.render(id, { sitekey });"
+            "}"
+            "function getRecaptchaResponse(id) {"
+            "  return grecaptcha.getResponse(id);"
+            "}";
+        if !Srl.Fs.createFile("/tmp/gcaptcha/helpers.js", js.buf, js.getLength()) {
+            Srl.System.fail(1, "Recaptcha: Could not create helper JS file.\n");
+        }
+        WebPlatform.addAssetRoute(Srl.String("/gcaptcha/"), Srl.String("/tmp/gcaptcha/"));
+    }
+
+    function initializeFrontend(): Srl.SrdRef[Promises.Promise[Int]] {
+        await(loadJsScript("/gcaptcha/helpers.js"));
+        loadJsScript("https://www.google.com/recaptcha/api.js?onload=recaptchaOnloadCallback&render=explicit");
+        def promise: Srl.SrdRef[Promises.Promise[Int]] = Promises.Promise[Int].new();
+        callCustomAsyncJsFn("awaitRecaptchaOnloadCallback", "", closure (Json) {
+            promise.resolve(0);
+        });
+        return promise;
+    }
+
+    class Captcha {
+        @injection def component: WebPlatform.Component;
+        def key: Srl.String;
+        def captchaId: Srl.String;
+
+        handler this~init(k: Srl.String) {
+            this.key = k;
+            this.view = Box();
+        }
+
+        handler (this:WebPlatform.Component).afterBuild() set_ptr {
+            this.captchaId = callCustomJsFn(
+                "renderRecaptcha",
+                Srl.String.format("{ \"id\": \"%s\", \"sitekey\": \"%s\" }", this.view.id.buf, this.key.buf)
+            )~cast[CharsPtr];
+        }
+
+        handler this.getResponse(): Srl.String {
+            return Srl.String(callCustomJsFn("getRecaptchaResponse", this.captchaId)~cast[CharsPtr]);
+        }
+
+        handler this_type(k: Srl.String): Srl.SrdRef[Captcha] {
+            return Srl.SrdRef[Captcha]().{ alloc()~init(k) };
+        }
+    }
+
+    function verify(key: CharsPtr, token: CharsPtr): Bool {
+        def curlHandle: ptr[Srl.Net.Curl] = Srl.Net.CurlEasy.init();
+
+        def content: Srl.Net._Content;
+        content.data = 0
+        content.size = 0
+
+        def url: array[Char, 2048];
+        Srl.String.assign(url~ptr,"https://www.google.com/recaptcha/api/siteverify?secret=%s&response=%s", key, token)
+
+        Srl.Net.CurlEasy.setOpt(curlHandle, Srl.Net.CurlOpt.URL, url~ptr);
+        Srl.Net.CurlEasy.setOpt(curlHandle, Srl.Net.CurlOpt.HTTPGET, true);
+        Srl.Net.CurlEasy.setOpt(curlHandle, Srl.Net.CurlOpt.HTTPHEADER, false);
+        Srl.Net.CurlEasy.setOpt(curlHandle, Srl.Net.CurlOpt.SSL_VERIFYPEER, false);
+        Srl.Net.CurlEasy.setOpt(curlHandle, Srl.Net.CurlOpt.FOLLOWLOCATION, true);
+        Srl.Net.CurlEasy.setOpt(curlHandle, Srl.Net.CurlOpt.WRITEDATA, content~ptr);
+        Srl.Net.CurlEasy.setOpt(curlHandle, Srl.Net.CurlOpt.WRITEFUNCTION, Srl.Net._getCallbackFunction~ptr);
+        def resultCode: Int = Srl.Net.CurlEasy.perform(curlHandle);
+        Srl.Net.CurlEasy.cleanup(curlHandle);
+        if resultCode == Srl.Net.CurlCode.OK {
+            def obj: Json = Srl.String(content.data, content.size);
+            Memory.free(content.data);
+            return obj.getBool("success")
+        }
+        if content.data != 0 Srl.Memory.free(content.data);
+        return false;
+    }
+}
