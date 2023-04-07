@@ -28,11 +28,7 @@ module Recaptcha {
     function initializeFrontend(): Srl.SrdRef[Promises.Promise[Int]] {
         await(loadJsScript("/gcaptcha/helpers.js"));
         loadJsScript("https://www.google.com/recaptcha/api.js?onload=recaptchaOnloadCallback&render=explicit");
-        def promise: Srl.SrdRef[Promises.Promise[Int]] = Promises.Promise[Int].new();
-        callCustomAsyncJsFn("awaitRecaptchaOnloadCallback", "", closure (Json) {
-            promise.resolve(0);
-        });
-        return promise;
+        return callCustomAsyncJsFn("awaitRecaptchaOnloadCallback", "").ignoreResult();
     }
 
     class Captcha {
