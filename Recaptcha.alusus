@@ -26,9 +26,10 @@ module Recaptcha {
     }
 
     function initializeFrontend(): Srl.SrdRef[Promises.Promise[Int]] {
-        await(loadJsScript("/gcaptcha/helpers.js"));
-        loadJsScript("https://www.google.com/recaptcha/api.js?onload=recaptchaOnloadCallback&render=explicit");
-        return callCustomAsyncJsFn("awaitRecaptchaOnloadCallback", "").ignoreResult();
+        return loadJsScript("/gcaptcha/helpers.js").then[Int](closure (Int, p: ref[Promises.Promise[Int]]) {
+            loadJsScript("https://www.google.com/recaptcha/api.js?onload=recaptchaOnloadCallback&render=explicit");
+            p.resolve(callCustomAsyncJsFn("awaitRecaptchaOnloadCallback", "").ignoreResult());
+        });
     }
 
     class Captcha {
