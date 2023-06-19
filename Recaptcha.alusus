@@ -61,7 +61,7 @@ module Recaptcha {
     function verify(key: CharsPtr, token: CharsPtr): Bool {
         def curlHandle: ptr[Srl.Net.Curl] = Srl.Net.CurlEasy.init();
 
-        def content: Srl.Net._Content;
+        def content: Srl.Net.ResponseContent;
         content.data = 0
         content.size = 0
 
@@ -74,7 +74,7 @@ module Recaptcha {
         Srl.Net.CurlEasy.setOpt(curlHandle, Srl.Net.CurlOpt.SSL_VERIFYPEER, false);
         Srl.Net.CurlEasy.setOpt(curlHandle, Srl.Net.CurlOpt.FOLLOWLOCATION, true);
         Srl.Net.CurlEasy.setOpt(curlHandle, Srl.Net.CurlOpt.WRITEDATA, content~ptr);
-        Srl.Net.CurlEasy.setOpt(curlHandle, Srl.Net.CurlOpt.WRITEFUNCTION, Srl.Net._getCallbackFunction~ptr);
+        Srl.Net.CurlEasy.setOpt(curlHandle, Srl.Net.CurlOpt.WRITEFUNCTION, Srl.Net.responseCallback~ptr);
         def resultCode: Int = Srl.Net.CurlEasy.perform(curlHandle);
         Srl.Net.CurlEasy.cleanup(curlHandle);
         if resultCode == Srl.Net.CurlCode.OK {
