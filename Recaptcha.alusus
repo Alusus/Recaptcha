@@ -80,7 +80,7 @@ module Recaptcha {
         if resultCode == Srl.Net.CurlCode.OK {
             def obj: Json = Srl.String(content.data, content.size);
             Memory.free(content.data);
-            return obj.getBool("success")
+            return obj("success")
         }
         if content.data != 0 Srl.Memory.free(content.data);
         return false;
