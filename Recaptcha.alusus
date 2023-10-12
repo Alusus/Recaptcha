@@ -18,6 +18,9 @@ module Recaptcha {
             "}"
             "function getRecaptchaResponse(id) {"
             "  return grecaptcha.getResponse(id);"
+            "}"
+            "function resetRecaptcha(id) {"
+            "  return grecaptcha.reset(id);"
             "}";
         if !Srl.Fs.createFile("/tmp/gcaptcha/helpers.js", js.buf, js.getLength()) {
             Srl.System.fail(1, "Recaptcha: Could not create helper JS file.\n");
@@ -51,6 +54,10 @@ module Recaptcha {
 
         handler this.getResponse(): Srl.String {
             return Srl.String(callCustomJsFn("getRecaptchaResponse", this.captchaId)~cast[CharsPtr]);
+        }
+
+        handler this.reset() {
+            callCustomJsFn("resetRecaptcha", this.captchaId);
         }
 
         handler this_type(k: Srl.String): Srl.SrdRef[Captcha] {

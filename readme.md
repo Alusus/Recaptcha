@@ -84,3 +84,9 @@ if Recaptcha.verify(recaptchaSecret, token) {
 }
 ```
 
+### Note
+
+Tokens are only usable in a single call to `verify`. To re-use the captcha after `verify` is called you
+need to reset the captcha using the `reset` member function so that you can get a new token. The user in
+this case will need to re-check the captcha box.
+
