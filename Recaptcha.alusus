@@ -85,9 +85,13 @@ module Recaptcha {
         def resultCode: Int = Srl.Net.CurlEasy.perform(curlHandle);
         Srl.Net.CurlEasy.cleanup(curlHandle);
         if resultCode == Srl.Net.CurlCode.OK {
-            def obj: Json = Srl.String(content.data, content.size);
-            Memory.free(content.data);
-            return obj("success")
+            def httpStatus: Int[64];
+            Srl.Net.CurlEasy.getInfo(curlHandle, Srl.Net.CurlInfo.RESPONSE_CODE, httpStatus~ptr);
+            if httpStatus >= 200 and httpStatus < 300 and content.data != 0 {
+                def obj: Json = Srl.String(content.data, content.size);
+                Memory.free(content.data);
+                return obj("success")
+            }
         }
         if content.data != 0 Srl.Memory.free(content.data);
         return false;
