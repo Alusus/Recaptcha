@@ -87,7 +87,6 @@ module Recaptcha {
             Srl.Net.CurlEasy.getInfo(curlHandle, Srl.Net.CurlInfo.RESPONSE_CODE, httpStatus~ptr);
             Srl.Net.CurlEasy.cleanup(curlHandle);
             if httpStatus >= 200 and httpStatus < 300 and content.data != 0 {
-                def res: Srl.String(content.data, content.size);
                 def obj: Json = Srl.String(content.data, content.size);
                 Memory.free(content.data);
                 return obj("success")
