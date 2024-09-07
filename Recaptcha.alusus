@@ -72,10 +72,9 @@ module Recaptcha {
         content.data = 0
         content.size = 0
 
-        def url: array[Char, 2048];
-        Srl.String.assign(url~ptr,"https://www.google.com/recaptcha/api/siteverify?secret=%s&response=%s", key, token)
+        def url: String = String.format("https://www.google.com/recaptcha/api/siteverify?secret=%s&response=%s", key, token);
 
-        Srl.Net.CurlEasy.setOpt(curlHandle, Srl.Net.CurlOpt.URL, url~ptr);
+        Srl.Net.CurlEasy.setOpt(curlHandle, Srl.Net.CurlOpt.URL, url.buf);
         Srl.Net.CurlEasy.setOpt(curlHandle, Srl.Net.CurlOpt.HTTPGET, true);
         Srl.Net.CurlEasy.setOpt(curlHandle, Srl.Net.CurlOpt.HTTPHEADER, false);
         Srl.Net.CurlEasy.setOpt(curlHandle, Srl.Net.CurlOpt.SSL_VERIFYPEER, false);
@@ -83,15 +82,18 @@ module Recaptcha {
         Srl.Net.CurlEasy.setOpt(curlHandle, Srl.Net.CurlOpt.WRITEDATA, content~ptr);
         Srl.Net.CurlEasy.setOpt(curlHandle, Srl.Net.CurlOpt.WRITEFUNCTION, Srl.Net.responseCallback~ptr);
         def resultCode: Int = Srl.Net.CurlEasy.perform(curlHandle);
-        Srl.Net.CurlEasy.cleanup(curlHandle);
         if resultCode == Srl.Net.CurlCode.OK {
             def httpStatus: Int[64];
             Srl.Net.CurlEasy.getInfo(curlHandle, Srl.Net.CurlInfo.RESPONSE_CODE, httpStatus~ptr);
+            Srl.Net.CurlEasy.cleanup(curlHandle);
             if httpStatus >= 200 and httpStatus < 300 and content.data != 0 {
+                def res: Srl.String(content.data, content.size);
                 def obj: Json = Srl.String(content.data, content.size);
                 Memory.free(content.data);
                 return obj("success")
             }
+        } else {
+            Srl.Net.CurlEasy.cleanup(curlHandle);
         }
         if content.data != 0 Srl.Memory.free(content.data);
         return false;
