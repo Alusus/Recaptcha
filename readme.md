@@ -25,10 +25,11 @@ Apm.importFile("Alusus/Recaptcha");
   * Json
   * Promises
   
-* Initialize the server side of the library by calling this function **outside any endpoints**:
+* Add module `Recaptcha` to the modules that WebPlatform will look for endpoints in:
 
 ```
-Recaptcha.initializeBackend();
+def serverModules: { MyServer, Recaptcha };
+buildAndRunServer[serverModules](options);
 ```
 
 * Initialize the frontend inside the endpoint that displays the captcha:
