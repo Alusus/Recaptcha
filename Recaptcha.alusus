@@ -1,35 +1,8 @@
 module Recaptcha {
-    function initializeBackend() {
-        if Srl.System.exec("mkdir -p /tmp/gcaptcha") != 0 {
-            Srl.System.fail(1, "Recaptcha: Could not create temp directory.\n");
-        }
-        def js: String =
-            "let recaptchaOnloadResolve;"
-            "const recaptchaOnloadPromise = new Promise((resolve) => { recaptchaOnloadResolve = resolve });"
-            "function recaptchaOnloadCallback() {"
-            "  recaptchaOnloadResolve();"
-            "}"
-            "function awaitRecaptchaOnloadCallback() {"
-            "  return recaptchaOnloadPromise;"
-            "}"
-            "function renderRecaptcha(arg) {"
-            "  const { id, sitekey } = JSON.parse(arg);"
-            "  return grecaptcha.render(id, { sitekey });"
-            "}"
-            "function getRecaptchaResponse(id) {"
-            "  return grecaptcha.getResponse(id);"
-            "}"
-            "function resetRecaptcha(id) {"
-            "  return grecaptcha.reset(id);"
-            "}";
-        if !Srl.Fs.createFile("/tmp/gcaptcha/helpers.js", js.buf, js.getLength()) {
-            Srl.System.fail(1, "Recaptcha: Could not create helper JS file.\n");
-        }
-        WebPlatform.addAssetRoute(Srl.String("/gcaptcha/"), Srl.String("/tmp/gcaptcha/"));
-    }
+    @assetsRoute["/recaptcha/"] def assetsRoute: ("$Assets/", "RecaptchaAssets/");
 
     function initializeFrontend(): Srl.SrdRef[Promises.Promise[Int]] {
-        return loadJsScript("/gcaptcha/helpers.js").then[Int](closure (Int, p: ref[Promises.Promise[Int]]) {
+        return loadJsScript("/recaptcha/binding.js").then[Int](closure (Int, p: ref[Promises.Promise[Int]]) {
             loadJsScript("https://www.google.com/recaptcha/api.js?onload=recaptchaOnloadCallback&render=explicit");
             p.resolve(callCustomAsyncJsFn("awaitRecaptchaOnloadCallback", "").ignoreResult());
         });
