@@ -2,7 +2,6 @@
 
 عرف ريـكابجا: لقب Recaptcha؛
 @دمج وحدة ريـكابجا {
-    عرف هيئ_الخادم: لقب initializeBackend؛
     عرف هيئ_الواجهة: لقب initializeFrontend؛
     عرف كـابجا: لقب Captcha؛
     @دمج صنف كـابجا {
