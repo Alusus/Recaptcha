@@ -91,3 +91,11 @@ Tokens are only usable in a single call to `verify`. To re-use the captcha after
 need to reset the captcha using the `reset` member function so that you can get a new token. The user in
 this case will need to re-check the captcha box.
 
+---
+
+## License
+
+Copyright © 2026 Sarmad Abdullah
+
+This project is licensed under the GNU Lesser General Public License v3.0 (LGPL-3.0). See the `COPYING` and `COPYING.LESSER` files for details.
+
