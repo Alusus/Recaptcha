@@ -1,5 +1,5 @@
 # Recaptcha
-[[عربي]](readme.ar.md)
+[[عربي]](README.ar.md)
 
 Alusus bindings for Google reCAPTCHA. This library is designed to work with WebPlatform.
 

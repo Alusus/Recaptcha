@@ -1,5 +1,5 @@
 # Recaptcha
-[[English]](readme.md)
+[[English]](README.md)
 
 مكتبة لاستخدام Google reCAPTCHA من برامج الأسس. تم تصميم هذه المكتبة للعمل مع مـنصة_ويب.
 
