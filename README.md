@@ -11,7 +11,7 @@ These steps assume you already have a WebPlatform project and you want to add Re
 
 ```
 import "Apm";
-Apm.importFile("Alusus/Recaptcha");
+Apm.importPackage("Alusus/Recaptcha@0.2");
 ```
 
 * Add other dependencies if they aren't already added in your project either directly or indirectly.

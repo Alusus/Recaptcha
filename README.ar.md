@@ -13,14 +13,14 @@
 
 ```
 اشمل "مـحا"؛
-مـحا.اشمل_ملف("Alusus/Recaptcha"، "ريـكابجا")؛
+مـحا.اشمل_حزمة("Alusus/Recaptcha@0.2"، "ريـكابجا")؛
 ```
 
 </div>
 
 ```
 import "Apm";
-Apm.importFile("Alusus/Recaptcha");
+Apm.importPackage("Alusus/Recaptcha@0.2");
 ```
 
 * أضف الاعتمادات الأخرى إذا لم يتم إضافتها بالفعل في مشروعك إما مباشرةً أو غير مباشرة. بالإضافة إلى
