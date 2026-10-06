@@ -18,7 +18,7 @@
  */
 
 module Recaptcha {
-    @assetsRoute["/recaptcha/"] def assetsRoute: ("$Assets/", "RecaptchaAssets/");
+    @WebPlatform.assetsRoute["/recaptcha/"] def assetsRoute: ("$Assets/", "RecaptchaAssets/");
 
     function initializeFrontend(): Srl.SrdRef[Promises.Promise[Int]] {
         return loadJsScript("/recaptcha/binding.js").then[Int](closure (Int, p: ref[Promises.Promise[Int]]) {
@@ -34,13 +34,13 @@ module Recaptcha {
 
         handler this~init(k: Srl.String) {
             this.key = k;
-            this.view = Box();
+            this.view = Box().{ domId = String("recaptcha_box") };
         }
 
         handler (this:WebPlatform.Component).afterBuild() set_ptr {
             this.captchaId = callCustomJsFn(
                 "renderRecaptcha",
-                Srl.String.format("{ \"id\": \"%s\", \"sitekey\": \"%s\" }", this.view.id.buf, this.key.buf)
+                Srl.String.format("{ \"id\": \"recaptcha_box\", \"sitekey\": \"%s\" }", this.key.buf)
             )~cast[CharsPtr];
         }
 
